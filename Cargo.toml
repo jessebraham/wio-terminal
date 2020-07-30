@@ -33,6 +33,9 @@ path = "../atsamd/hal"
 version = "~0.8"
 default-features = false
 
+[dev-dependencies]
+panic-halt = "~0.2"
+
 [features]
 default = ["atsamd-hal/samd51p19a", "rt", "unproven", "usb"]
 rt = ["cortex-m-rt", "atsamd-hal/samd51p19a-rt"]
@@ -49,3 +52,6 @@ lto = true
 debug = true
 lto = true
 opt-level = "s"
+
+[[example]]
+name = "blinky"
