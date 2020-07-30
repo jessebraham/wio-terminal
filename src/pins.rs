@@ -1,7 +1,17 @@
 //! Wio Terminal pins
 
-use super::hal::gpio::{self, *};
-use super::hal::{define_pins, target_device};
+use super::hal;
+use hal::clock::GenericClockController;
+use hal::gpio::{self, *};
+use hal::sercom::{PadPin, Sercom2Pad0, Sercom2Pad1, UART2};
+use hal::target_device::{MCLK, SERCOM2};
+use hal::time::Hertz;
+use hal::{define_pins, target_device};
+
+#[cfg(feature = "usb")]
+use hal::usb::usb_device::bus::UsbBusAllocator;
+#[cfg(feature = "usb")]
+pub use hal::usb::UsbBus;
 
 define_pins!(
     /// Maps the pins to their functions
@@ -148,3 +158,136 @@ define_pins!(
     pin output_ctr_3v3 = c15,
     pin irq0 = c20,
 );
+
+/// Sets of pins split apart by category
+pub struct Sets {
+    /// QSPI Flash pins
+    pub flash: QSPIFlash,
+
+    /// SD Card pins
+    pub sd_card: SDCard,
+
+    /// UART (external pinout) pins
+    pub uart: UART,
+
+    /// USB pins
+    pub usb: USB,
+}
+
+impl Pins {
+    /// Split the device pins into subsets
+    pub fn split(self) -> Sets {
+        let flash = QSPIFlash {
+            sck: self.mcu_flash_qspi_clk,
+            cs: self.mcu_flash_qspi_cs,
+            d0: self.mcu_flash_qspi_io0,
+            d1: self.mcu_flash_qspi_io1,
+            d2: self.mcu_flash_qspi_io2,
+            d3: self.mcu_flash_qspi_io3,
+        };
+
+        let sd_card = SDCard {
+            cs: self.sd_cs,
+            mosi: self.sd_mosi,
+            sck: self.sd_sck,
+            miso: self.sd_miso,
+            det: self.sd_det,
+        };
+
+        let uart = UART {
+            rx: self.rxd,
+            tx: self.txd,
+        };
+
+        let usb = USB {
+            dm: self.usb_dm,
+            dp: self.usb_dp,
+        };
+
+        Sets {
+            flash,
+            sd_card,
+            uart,
+            usb,
+        }
+    }
+}
+
+/// QSPI Flash pins
+pub struct QSPIFlash {
+    pub sck: Pb10<Input<Floating>>,
+    pub cs: Pb11<Input<Floating>>,
+    pub d0: Pa8<Input<Floating>>,
+    pub d1: Pa9<Input<Floating>>,
+    pub d2: Pa10<Input<Floating>>,
+    pub d3: Pa11<Input<Floating>>,
+}
+
+/// SD Card pins
+pub struct SDCard {
+    pub cs: Pc19<Input<Floating>>,
+    pub mosi: Pc16<Input<Floating>>,
+    pub sck: Pc17<Input<Floating>>,
+    pub miso: Pc18<Input<Floating>>,
+    pub det: Pd12<Input<Floating>>,
+}
+
+/// UART pins
+pub struct UART {
+    pub tx: Pb26<Input<Floating>>,
+    pub rx: Pb27<Input<Floating>>,
+}
+
+impl UART {
+    /// Convenience for setting up the labelled TXD, RXD pins to operate as a
+    /// UART device at the specified baud rate.
+    pub fn uart<F: Into<Hertz>>(
+        self,
+        clocks: &mut GenericClockController,
+        baud: F,
+        sercom2: SERCOM2,
+        mclk: &mut MCLK,
+        port: &mut Port,
+    ) -> UART2<Sercom2Pad1<gpio::Pb27<gpio::PfC>>, Sercom2Pad0<gpio::Pb26<gpio::PfC>>, (), ()> {
+        let gclk0 = clocks.gclk0();
+
+        UART2::new(
+            &clocks.sercom2_core(&gclk0).unwrap(),
+            baud.into(),
+            sercom2,
+            mclk,
+            (self.rx.into_pad(port), self.tx.into_pad(port)),
+        )
+    }
+}
+
+/// USB pins
+pub struct USB {
+    pub dm: Pa24<Input<Floating>>,
+    pub dp: Pa25<Input<Floating>>,
+}
+
+impl USB {
+    #[cfg(feature = "usb")]
+    pub fn usb_allocator(
+        self,
+        usb: target_device::USB,
+        clocks: &mut GenericClockController,
+        mclk: &mut MCLK,
+        port: &mut Port,
+    ) -> UsbBusAllocator<UsbBus> {
+        use target_device::gclk::{genctrl::SRC_A, pchctrl::GEN_A};
+
+        clocks.configure_gclk_divider_and_source(GEN_A::GCLK2, 1, SRC_A::DFLL, false);
+        let usb_gclk = clocks.get_gclk(GEN_A::GCLK2).unwrap();
+        let usb_clock = &clocks.usb(&usb_gclk).unwrap();
+
+        UsbBusAllocator::new(UsbBus::new(
+            usb_clock,
+            mclk,
+            self.dm.into_function(port),
+            self.dp.into_function(port),
+            usb,
+        ))
+    }
+}
