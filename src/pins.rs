@@ -1,6 +1,6 @@
 //! Wio Terminal pins
 
-use super::hal;
+use super::atsamd_hal as hal;
 use hal::clock::GenericClockController;
 use hal::gpio::{self, *};
 use hal::sercom::{PadPin, Sercom2Pad0, Sercom2Pad1, UART2};
@@ -161,8 +161,14 @@ define_pins!(
 
 /// Sets of pins split apart by category
 pub struct Sets {
+    /// Accelerometer I2C pins
+    pub accelerometer: Accelerometer,
+
     /// QSPI Flash pins
     pub flash: QSPIFlash,
+
+    //// GPIO port
+    pub port: Port,
 
     /// SD Card pins
     pub sd_card: SDCard,
@@ -177,6 +183,11 @@ pub struct Sets {
 impl Pins {
     /// Split the device pins into subsets
     pub fn split(self) -> Sets {
+        let accelerometer = Accelerometer {
+            scl: self.i2c0_scl,
+            sda: self.i2c0_sda,
+        };
+
         let flash = QSPIFlash {
             sck: self.mcu_flash_qspi_clk,
             cs: self.mcu_flash_qspi_cs,
@@ -185,6 +196,8 @@ impl Pins {
             d2: self.mcu_flash_qspi_io2,
             d3: self.mcu_flash_qspi_io3,
         };
+
+        let port = self.port;
 
         let sd_card = SDCard {
             cs: self.sd_cs,
@@ -205,12 +218,20 @@ impl Pins {
         };
 
         Sets {
+            accelerometer,
             flash,
+            port,
             sd_card,
             uart,
             usb,
         }
     }
+}
+
+/// I2C Accelerometer pins
+pub struct Accelerometer {
+    pub scl: Pa12<Input<Floating>>,
+    pub sda: Pa13<Input<Floating>>,
 }
 
 /// QSPI Flash pins
@@ -248,7 +269,7 @@ impl UART {
         sercom2: SERCOM2,
         mclk: &mut MCLK,
         port: &mut Port,
-    ) -> UART2<Sercom2Pad1<gpio::Pb27<gpio::PfC>>, Sercom2Pad0<gpio::Pb26<gpio::PfC>>, (), ()> {
+    ) -> UART2<Sercom2Pad1<Pb27<PfC>>, Sercom2Pad0<Pb26<PfC>>, (), ()> {
         let gclk0 = clocks.gclk0();
 
         UART2::new(
