@@ -1,23 +1,16 @@
-//! Wio Terminal pins
+use atsamd_hal::gpio::{self, *};
+use atsamd_hal::{define_pins, target_device};
 
-use super::atsamd_hal as hal;
-use hal::clock::GenericClockController;
-use hal::gpio::{self, *};
-use hal::sercom::{PadPin, Sercom2Pad0, Sercom2Pad1, UART2};
-use hal::target_device::{MCLK, SERCOM2};
-use hal::time::Hertz;
-use hal::{define_pins, target_device};
-
-#[cfg(feature = "usb")]
-use hal::usb::usb_device::bus::UsbBusAllocator;
-#[cfg(feature = "usb")]
-pub use hal::usb::UsbBus;
+use super::sensors::Accelerometer;
+use super::serial::{UART, USB};
+use super::storage::{QSPIFlash, SDCard};
 
 define_pins!(
-    /// Maps the pins to their functions
+    /// Map the desired pin names to their physical pins
     struct Pins,
     target_device: target_device,
 
+    // NOTE:
     // The following pin names were adapted from the labels in the schematic.
     // They will likely evolve over time.
     // They're not in any particular order.
@@ -34,7 +27,7 @@ define_pins!(
     pin switch_x = d8,
     pin switch_y = d9,
     pin switch_z = d10,
-    // pin switch_b = d12,  FIXME: why does this cause a build error?
+    // pin switch_b = d12, // NOTE: `sd_det` is also mapped to `d12`
     pin switch_u = d20,
 
     /// I2C
@@ -225,90 +218,5 @@ impl Pins {
             uart,
             usb,
         }
-    }
-}
-
-/// I2C Accelerometer pins
-pub struct Accelerometer {
-    pub scl: Pa12<Input<Floating>>,
-    pub sda: Pa13<Input<Floating>>,
-}
-
-/// QSPI Flash pins
-pub struct QSPIFlash {
-    pub sck: Pb10<Input<Floating>>,
-    pub cs: Pb11<Input<Floating>>,
-    pub d0: Pa8<Input<Floating>>,
-    pub d1: Pa9<Input<Floating>>,
-    pub d2: Pa10<Input<Floating>>,
-    pub d3: Pa11<Input<Floating>>,
-}
-
-/// SD Card pins
-pub struct SDCard {
-    pub cs: Pc19<Input<Floating>>,
-    pub mosi: Pc16<Input<Floating>>,
-    pub sck: Pc17<Input<Floating>>,
-    pub miso: Pc18<Input<Floating>>,
-    pub det: Pd12<Input<Floating>>,
-}
-
-/// UART pins
-pub struct UART {
-    pub tx: Pb26<Input<Floating>>,
-    pub rx: Pb27<Input<Floating>>,
-}
-
-impl UART {
-    /// Convenience for setting up the labelled TXD, RXD pins to operate as a
-    /// UART device at the specified baud rate.
-    pub fn uart<F: Into<Hertz>>(
-        self,
-        clocks: &mut GenericClockController,
-        baud: F,
-        sercom2: SERCOM2,
-        mclk: &mut MCLK,
-        port: &mut Port,
-    ) -> UART2<Sercom2Pad1<Pb27<PfC>>, Sercom2Pad0<Pb26<PfC>>, (), ()> {
-        let gclk0 = clocks.gclk0();
-
-        UART2::new(
-            &clocks.sercom2_core(&gclk0).unwrap(),
-            baud.into(),
-            sercom2,
-            mclk,
-            (self.rx.into_pad(port), self.tx.into_pad(port)),
-        )
-    }
-}
-
-/// USB pins
-pub struct USB {
-    pub dm: Pa24<Input<Floating>>,
-    pub dp: Pa25<Input<Floating>>,
-}
-
-impl USB {
-    #[cfg(feature = "usb")]
-    pub fn usb_allocator(
-        self,
-        usb: target_device::USB,
-        clocks: &mut GenericClockController,
-        mclk: &mut MCLK,
-        port: &mut Port,
-    ) -> UsbBusAllocator<UsbBus> {
-        use target_device::gclk::{genctrl::SRC_A, pchctrl::GEN_A};
-
-        clocks.configure_gclk_divider_and_source(GEN_A::GCLK2, 1, SRC_A::DFLL, false);
-        let usb_gclk = clocks.get_gclk(GEN_A::GCLK2).unwrap();
-        let usb_clock = &clocks.usb(&usb_gclk).unwrap();
-
-        UsbBusAllocator::new(UsbBus::new(
-            usb_clock,
-            mclk,
-            self.dm.into_function(port),
-            self.dp.into_function(port),
-            usb,
-        ))
     }
 }
