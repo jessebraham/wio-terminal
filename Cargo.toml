@@ -9,8 +9,8 @@ categories = [
     "no-std",
 ]
 keywords = [
-    "cortex-m",
     "arm",
+    "cortex-m",
     "embedded-hal",
     "no-std",
 ]
@@ -20,18 +20,11 @@ readme = "README.md"
 edition = "2018"
 
 [dependencies]
-cortex-m = "~0.6"
-embedded-hal = "~0.2"
-nb = "~1.0"
-
-[dependencies.cortex-m-rt]
-version = "~0.6.12"
-optional = true
-
-[dependencies.atsamd-hal]
-path = "../atsamd/hal"
-version = "~0.8"
-default-features = false
+atsamd-hal = { git = "https://github.com/atsamd-rs/atsamd", rev = "af70a8d4cded7da55d5f52bd7499f0b3d720cea5" }
+cortex-m-rt = { version = "~0.6", optional = true }
+embedded-graphics = "~0.6"
+ili9341 = "~0.3"
+lis3dh = { git = "https://github.com/BenBergman/lis3dh-rs", rev = "0bd78d8aaf197dba9a4570c2934bf222ca20562c" }
 
 [dev-dependencies]
 panic-halt = "~0.2"

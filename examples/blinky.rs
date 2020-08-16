@@ -8,8 +8,8 @@ use wio_terminal as hal;
 
 use hal::clock::GenericClockController;
 use hal::delay::Delay;
-use hal::pac::{CorePeripherals, Peripherals};
 use hal::prelude::*;
+use hal::target_device::{CorePeripherals, Peripherals};
 use hal::{entry, Pins};
 
 #[entry]

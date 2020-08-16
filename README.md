@@ -21,7 +21,7 @@ This project is made possible thanks to the following crates:
 ## Resources
 
 * [Wio Terminal product page](https://www.seeedstudio.com/Wio-Terminal-p-4509.html)
-* [Wio Terminal wiki](https://wiki.seeedstudio.com/Wio-Terminal-Light/)
+* [Wio Terminal wiki](https://wiki.seeedstudio.com/Wio-Terminal-Getting-Started/)
 * [Wio Terminal user manual](https://files.seeedstudio.com/wiki/Wio-Terminal/res/Wio-Terminal-User-Manual.pdf)
 
 ## Examples
