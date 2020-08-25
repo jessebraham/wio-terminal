@@ -1,6 +1,7 @@
 use atsamd_hal::gpio::{self, *};
 use atsamd_hal::{define_pins, target_device};
 
+use super::display::Display;
 use super::sensors::Accelerometer;
 use super::serial::{UART, USB};
 use super::storage::{QSPIFlash, SDCard};
@@ -55,6 +56,7 @@ define_pins!(
     pin lcd_miso = b18,
     pin lcd_mosi = b19,
     pin lcd_sck = b20,
+    pin lcd_cs = b21,
     pin lcd_backlight = c5,
     pin lcd_dc = c6,
     pin lcd_reset = c7,
@@ -157,6 +159,9 @@ pub struct Sets {
     /// Accelerometer I2C pins
     pub accelerometer: Accelerometer,
 
+    /// LCD display pins
+    pub display: Display,
+
     /// QSPI Flash pins
     pub flash: QSPIFlash,
 
@@ -179,6 +184,16 @@ impl Pins {
         let accelerometer = Accelerometer {
             scl: self.i2c0_scl,
             sda: self.i2c0_sda,
+        };
+
+        let display = Display {
+            miso: self.lcd_miso,
+            mosi: self.lcd_mosi,
+            sck: self.lcd_sck,
+            cs: self.lcd_cs,
+            dc: self.lcd_dc,
+            reset: self.lcd_reset,
+            backlight: self.lcd_backlight,
         };
 
         let flash = QSPIFlash {
@@ -212,6 +227,7 @@ impl Pins {
 
         Sets {
             accelerometer,
+            display,
             flash,
             port,
             sd_card,
