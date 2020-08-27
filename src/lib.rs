@@ -17,6 +17,8 @@ pub use atsamd_hal::target_device;
 #[cfg(feature = "rt")]
 pub use cortex_m_rt::entry;
 
+pub mod prelude;
+
 mod display;
 mod pins;
 mod sensors;

@@ -1,5 +1,3 @@
-//! TODO: document me
-
 use atsamd_hal::clock::GenericClockController;
 use atsamd_hal::delay::Delay;
 use atsamd_hal::gpio::*;
@@ -8,7 +6,8 @@ use atsamd_hal::prelude::*;
 use atsamd_hal::sercom::{PadPin, SPIMaster7, Sercom7Pad1, Sercom7Pad2, Sercom7Pad3};
 use atsamd_hal::target_device::{MCLK, SERCOM7};
 
-use ili9341::{spi::SpiInterface, Ili9341, Orientation};
+pub use ili9341::Orientation;
+use ili9341::{spi::SpiInterface, Ili9341};
 
 /// ILI9341 LCD display pins (uses `SERCOM7`)
 pub struct Display {
