@@ -1,16 +1,14 @@
-//! Blink the user LED.
-
 #![no_std]
 #![no_main]
 
 use panic_halt as _;
-use wio_terminal as hal;
+use wio_terminal as wio;
 
-use hal::clock::GenericClockController;
-use hal::delay::Delay;
-use hal::prelude::*;
-use hal::target_device::{CorePeripherals, Peripherals};
-use hal::{entry, Pins};
+use wio::hal::clock::GenericClockController;
+use wio::hal::delay::Delay;
+use wio::pac::{CorePeripherals, Peripherals};
+use wio::prelude::*;
+use wio::{entry, Pins};
 
 #[entry]
 fn main() -> ! {

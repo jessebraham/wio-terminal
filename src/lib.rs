@@ -2,21 +2,26 @@
 //! API for the Seeed Studio [Wio Terminal].
 //!
 //! This crate is essentially a thin wrapper for [atsamd-hal], and re-exports
-//! many of its members.
+//! it along with some of its members.
 //!
 //! [Wio Terminal]: https://www.seeedstudio.com/Wio-Terminal-p-4509.html
 //! [atsamd-hal]: https://github.com/atsamd-rs/atsamd
 
 #![no_std]
 
-pub use atsamd_hal;
-pub use atsamd_hal::common::*;
-pub use atsamd_hal::samd51::*;
-pub use atsamd_hal::target_device;
+// Re-export the HAL and the PAC to give the user lower-level access to the
+// device should they need it.
+pub use atsamd_hal::{self as hal, target_device as pac};
 
 #[cfg(feature = "rt")]
 pub use cortex_m_rt::entry;
 
+// The accelerometer crate contains a number of traits and types which may be
+// useful to the user.
+pub use lis3dh::accelerometer;
+
+// The prelude is the only public module, as the remaining have their members
+// available through the Sets struct.
 pub mod prelude;
 
 mod display;

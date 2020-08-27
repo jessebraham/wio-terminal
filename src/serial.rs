@@ -5,9 +5,7 @@ use atsamd_hal::target_device::{self, MCLK, SERCOM2};
 use atsamd_hal::time::Hertz;
 
 #[cfg(feature = "usb")]
-use atsamd_hal::usb::usb_device::bus::UsbBusAllocator;
-#[cfg(feature = "usb")]
-use atsamd_hal::usb::UsbBus;
+use atsamd_hal::usb::{usb_device::bus::UsbBusAllocator, UsbBus};
 #[cfg(feature = "usb")]
 use target_device::gclk::{genctrl::SRC_A, pchctrl::GEN_A};
 

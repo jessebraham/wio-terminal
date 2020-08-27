@@ -6,8 +6,7 @@ use atsamd_hal::prelude::*;
 use atsamd_hal::sercom::{PadPin, SPIMaster7, Sercom7Pad1, Sercom7Pad2, Sercom7Pad3};
 use atsamd_hal::target_device::{MCLK, SERCOM7};
 
-pub use ili9341::Orientation;
-use ili9341::{spi::SpiInterface, Ili9341};
+use ili9341::{spi::SpiInterface, Ili9341, Orientation};
 
 /// ILI9341 LCD display pins (uses `SERCOM7`)
 pub struct Display {
@@ -34,7 +33,11 @@ pub struct Display {
 }
 
 impl Display {
-    /// TODO: document me
+    /// Initialize the display and its corresponding SPI bus peripheral,
+    /// returning the display driver struct for later interaction.
+    ///
+    /// Sets the initial orientation of the display (default is
+    /// LandscapeFlipped) and enables the backlight.
     pub fn init(
         self,
         clocks: &mut GenericClockController,

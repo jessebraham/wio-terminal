@@ -4,7 +4,6 @@ use atsamd_hal::prelude::*;
 use atsamd_hal::sercom::{I2CMaster4, PadPin, Sercom4Pad0, Sercom4Pad1};
 use atsamd_hal::target_device::{MCLK, SERCOM4};
 
-pub use lis3dh::accelerometer;
 use lis3dh::{Lis3dh, SlaveAddr};
 
 /// I2C Accelerometer pins (uses `SERCOM4`)
