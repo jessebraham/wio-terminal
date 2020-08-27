@@ -45,6 +45,3 @@ lto = true
 debug = true
 lto = true
 opt-level = "s"
-
-[[example]]
-name = "blinky"

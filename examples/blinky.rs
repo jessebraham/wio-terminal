@@ -17,7 +17,7 @@ fn main() -> ! {
     let mut peripherals = Peripherals::take().unwrap();
     let core = CorePeripherals::take().unwrap();
 
-    let mut clocks = GenericClockController::with_internal_32kosc(
+    let mut clocks = GenericClockController::with_external_32kosc(
         peripherals.GCLK,
         &mut peripherals.MCLK,
         &mut peripherals.OSC32KCTRL,
@@ -28,12 +28,10 @@ fn main() -> ! {
 
     let mut pins = Pins::new(peripherals.PORT);
     let mut user_led = pins.user_led.into_open_drain_output(&mut pins.port);
+    user_led.set_low().unwrap();
 
     loop {
-        user_led.set_high().unwrap();
-        delay.delay_ms(200u8);
-
-        user_led.set_low().unwrap();
+        user_led.toggle();
         delay.delay_ms(200u8);
     }
 }
