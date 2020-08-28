@@ -1,16 +1,15 @@
 # `wio-terminal`
 
-> A Board Support Package (BSP) which provides a type-safe API for the Seeed Studio [Wio Terminal](https://www.seeedstudio.com/Wio-Terminal-p-4509.html).
-
 [![Build Status](https://travis-ci.org/jessebraham/wio-terminal.svg?branch=master)](https://travis-ci.org/jessebraham/wio-terminal)
 [![Crates.io](https://img.shields.io/crates/v/wio-terminal.svg)](https://crates.io/crates/wio-terminal)
 [![Docs](https://docs.rs/wio-terminal/badge.svg)](https://docs.rs/wio-terminal/)
 ![License](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue)
 
+> A Board Support Package (BSP) which provides a type-safe API for the Seeed Studio [Wio Terminal](https://www.seeedstudio.com/Wio-Terminal-p-4509.html).
+
 This project is made possible thanks to the following crates:
 
 * [atsamd-hal](https://github.com/atsamd-rs/atsamd)
-* [embedded-graphics](https://github.com/jamwaffles/embedded-graphics)
 * [ili9341-rs](https://github.com/yuri91/ili9341-rs)
 * [lis3dh-rs](https://github.com/BenBergman/lis3dh-rs)
 
@@ -26,18 +25,7 @@ This project is made possible thanks to the following crates:
 
 ## Examples
 
-To build the examples:
-
-```bash
-$ git clone https://github.com/jessebraham/wio-terminal.git
-$ cd wio-terminal/
-$ # you can build all the examples at once:
-$ cargo build --examples
-$ # ...or specify one at a time:
-$ cargo build --example=blinky
-```
-
-__TODO:__ write instructions for flashing firmware to the device
+For information on building and flashing the examples to your device, as well as a list of all examples with brief explanations, please see the [examples README](examples/README.md).
 
 ## License
 
