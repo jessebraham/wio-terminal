@@ -4,6 +4,7 @@ use atsamd_hal::{define_pins, target_device};
 use super::display::Display;
 use super::sensors::Accelerometer;
 use super::serial::{UART, USB};
+use super::sound::Buzzer;
 use super::storage::{QSPIFlash, SDCard};
 
 define_pins!(
@@ -159,6 +160,9 @@ pub struct Sets {
     /// Accelerometer I2C pins
     pub accelerometer: Accelerometer,
 
+    /// Buzzer pins
+    pub buzzer: Buzzer,
+
     /// LCD display pins
     pub display: Display,
 
@@ -184,6 +188,10 @@ impl Pins {
         let accelerometer = Accelerometer {
             scl: self.i2c0_scl,
             sda: self.i2c0_sda,
+        };
+
+        let buzzer = Buzzer {
+            ctr: self.buzzer_ctr,
         };
 
         let display = Display {
@@ -227,6 +235,7 @@ impl Pins {
 
         Sets {
             accelerometer,
+            buzzer,
             display,
             flash,
             port,

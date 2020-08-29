@@ -20,7 +20,7 @@ readme = "README.md"
 edition = "2018"
 
 [dependencies]
-atsamd-hal = { git = "https://github.com/atsamd-rs/atsamd", rev = "2f3da797283fef11960a37de4a33cf9f46674756" }
+atsamd-hal = { git = "https://github.com/atsamd-rs/atsamd", rev = "bec8c1138e6aa6e88354b8b77bdd81c997d9f0ea" }
 cortex-m-rt = { version = "~0.6", optional = true }
 ili9341 = "~0.3"
 lis3dh = { git = "https://github.com/BenBergman/lis3dh-rs", rev = "0bd78d8aaf197dba9a4570c2934bf222ca20562c" }

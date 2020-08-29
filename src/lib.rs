@@ -28,10 +28,12 @@ mod display;
 mod pins;
 mod sensors;
 mod serial;
+mod sound;
 mod storage;
 
 pub use display::*;
 pub use pins::*;
 pub use sensors::*;
 pub use serial::*;
+pub use sound::*;
 pub use storage::*;
