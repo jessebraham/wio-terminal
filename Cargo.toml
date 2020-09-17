@@ -20,10 +20,17 @@ readme = "README.md"
 edition = "2018"
 
 [dependencies]
-atsamd-hal = { git = "https://github.com/atsamd-rs/atsamd", rev = "bec8c1138e6aa6e88354b8b77bdd81c997d9f0ea" }
 cortex-m-rt = { version = "~0.6", optional = true }
-ili9341 = "~0.3"
-lis3dh = { git = "https://github.com/BenBergman/lis3dh-rs", rev = "0bd78d8aaf197dba9a4570c2934bf222ca20562c" }
+display-interface-spi = "0.4.0"
+ili9341 = "~0.4"
+
+[dependencies.atsamd-hal]
+git = "https://github.com/atsamd-rs/atsamd"
+rev = "54cb571de48beee6d3a3ba61d87e27185536b879"
+
+[dependencies.lis3dh]
+git = "https://github.com/BenBergman/lis3dh-rs"
+rev = "0bd78d8aaf197dba9a4570c2934bf222ca20562c"
 
 [dev-dependencies]
 embedded-graphics = "~0.6"
@@ -42,6 +49,5 @@ debug = true
 lto = true
 
 [profile.release]
-debug = true
 lto = true
 opt-level = "s"

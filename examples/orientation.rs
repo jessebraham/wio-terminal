@@ -1,6 +1,3 @@
-//! Tracks the orientation of the device using the LIS3DH accelerometer, and
-//! rotates the display accordingly.
-
 #![no_std]
 #![no_main]
 
@@ -58,13 +55,16 @@ fn main() -> ! {
     // the screen, load an image of Ferris from a RAW file, and draw it to the
     // screen.
     // By default, the display is in the LandscapeFlipped orientation.
-    let mut display = sets.display.init(
-        &mut clocks,
-        peripherals.SERCOM7,
-        &mut peripherals.MCLK,
-        &mut sets.port,
-        &mut delay,
-    );
+    let (mut display, _backlight) = sets
+        .display
+        .init(
+            &mut clocks,
+            peripherals.SERCOM7,
+            &mut peripherals.MCLK,
+            &mut sets.port,
+            &mut delay,
+        )
+        .unwrap();
 
     // The display's resolution is 320x240. I'm too lazy to deal with orientation
     // for something as trivial as a backdrop, so it's larger than the display in
