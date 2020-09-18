@@ -1,8 +1,10 @@
+use atsamd_hal::adc::Adc;
 use atsamd_hal::clock::GenericClockController;
-use atsamd_hal::gpio::{Floating, Input, Pa12, Pa13, PfD, Port};
+use atsamd_hal::gpio::{Floating, Input, Pa12, Pa13, Pd1, PfB, PfD, Port};
 use atsamd_hal::prelude::*;
 use atsamd_hal::sercom::{I2CMaster4, PadPin, Sercom4Pad0, Sercom4Pad1};
-use atsamd_hal::target_device::{MCLK, SERCOM4};
+use atsamd_hal::target_device::gclk::pchctrl::GEN_A::GCLK11;
+use atsamd_hal::target_device::{ADC1, MCLK, SERCOM4};
 
 use lis3dh::{Lis3dh, SlaveAddr};
 
@@ -41,5 +43,28 @@ impl Accelerometer {
         // The schematic states that the alternate I2C address `0x19` is used,
         // but that doesn't appear to work!
         Lis3dh::new(i2c, SlaveAddr::Default).unwrap()
+    }
+}
+
+// Analog Light Sensor
+pub struct LightSensor {
+    /// Analog Light Sensor input pin
+    pub pd1: Pd1<Input<Floating>>,
+}
+
+impl LightSensor {
+    /// Initialize Pd1 as an ADC input, and return a Tuple containing the ADC
+    /// peripheral and the configured pin.
+    pub fn init(
+        self,
+        adc: ADC1,
+        clocks: &mut GenericClockController,
+        mclk: &mut MCLK,
+        port: &mut Port,
+    ) -> (Adc<ADC1>, Pd1<PfB>) {
+        let adc1 = Adc::adc1(adc, mclk, clocks, GCLK11);
+        let pd1 = self.pd1.into_function_b(port);
+
+        (adc1, pd1)
     }
 }

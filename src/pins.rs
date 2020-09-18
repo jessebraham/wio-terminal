@@ -2,9 +2,9 @@ use atsamd_hal::gpio::{self, *};
 use atsamd_hal::{define_pins, target_device};
 
 use super::display::Display;
-use super::sensors::Accelerometer;
+use super::sensors::{Accelerometer, LightSensor};
 use super::serial::{UART, USB};
-use super::sound::Buzzer;
+use super::sound::{Buzzer, Microphone};
 use super::storage::{QSPIFlash, SDCard};
 
 define_pins!(
@@ -169,7 +169,13 @@ pub struct Sets {
     /// QSPI Flash pins
     pub flash: QSPIFlash,
 
-    //// GPIO port
+    /// Analog Light Sensor pins
+    pub light_sensor: LightSensor,
+
+    /// Microphone output pins
+    pub microphone: Microphone,
+
+    /// GPIO port
     pub port: Port,
 
     /// SD Card pins
@@ -213,6 +219,14 @@ impl Pins {
             d3: self.mcu_flash_qspi_io3,
         };
 
+        let light_sensor = LightSensor {
+            pd1: self.fpc_d13_a13,
+        };
+
+        let microphone = Microphone {
+            mic: self.mic_output,
+        };
+
         let port = self.port;
 
         let sd_card = SDCard {
@@ -238,6 +252,8 @@ impl Pins {
             buzzer,
             display,
             flash,
+            light_sensor,
+            microphone,
             port,
             sd_card,
             uart,
