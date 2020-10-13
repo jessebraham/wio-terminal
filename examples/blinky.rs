@@ -8,7 +8,7 @@ use wio::hal::clock::GenericClockController;
 use wio::hal::delay::Delay;
 use wio::pac::{CorePeripherals, Peripherals};
 use wio::prelude::*;
-use wio::{entry, Pins};
+use wio::{entry, Pins, Sets};
 
 #[entry]
 fn main() -> ! {
@@ -24,8 +24,8 @@ fn main() -> ! {
     );
     let mut delay = Delay::new(core.SYST, &mut clocks);
 
-    let mut pins = Pins::new(peripherals.PORT);
-    let mut user_led = pins.user_led.into_open_drain_output(&mut pins.port);
+    let mut sets: Sets = Pins::new(peripherals.PORT).split();
+    let mut user_led = sets.user_led.into_open_drain_output(&mut sets.port);
     user_led.set_low().unwrap();
 
     loop {

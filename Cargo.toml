@@ -20,8 +20,10 @@ readme = "README.md"
 edition = "2018"
 
 [dependencies]
+cortex-m = "~0.6"
 cortex-m-rt = { version = "~0.6", optional = true }
 display-interface-spi = "0.4.0"
+heapless = "~0.5"
 ili9341 = "~0.4"
 
 [dependencies.atsamd-hal]
@@ -32,6 +34,14 @@ rev = "54cb571de48beee6d3a3ba61d87e27185536b879"
 git = "https://github.com/BenBergman/lis3dh-rs"
 rev = "0bd78d8aaf197dba9a4570c2934bf222ca20562c"
 
+[dependencies.usb-device]
+version = "~0.2"
+optional = true
+
+[dependencies.usbd-serial]
+version = "~0.1"
+optional = true
+
 [dev-dependencies]
 embedded-graphics = "~0.6"
 panic-halt = "~0.2"
@@ -40,7 +50,7 @@ panic-halt = "~0.2"
 default = ["atsamd-hal/samd51p19a", "rt", "unproven", "usb"]
 rt = ["cortex-m-rt", "atsamd-hal/samd51p19a-rt"]
 unproven = ["atsamd-hal/unproven"]
-usb = ["atsamd-hal/usb"]
+usb = ["atsamd-hal/usb", "usb-device", "usbd-serial"]
 
 [profile.dev]
 incremental = false
@@ -51,3 +61,13 @@ lto = true
 [profile.release]
 lto = true
 opt-level = "s"
+
+[[example]]
+name = "usb_serial_display"
+required-features = ["usb"]
+
+[[example]]
+name = "blinky"
+
+[[example]]
+name = "orientation"
