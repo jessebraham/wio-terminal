@@ -1,6 +1,6 @@
 #[rustfmt::skip]
 use atsamd_hal::gpio::{
-    Floating, Input, PfC, Port,
+    Floating, Input,
     Pa8, Pa9, Pa10, Pa11, Pb10, Pb11, Pc16, Pc17, Pc18, Pc19, Pd12,
 };
 

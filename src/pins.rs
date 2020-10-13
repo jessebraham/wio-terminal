@@ -186,6 +186,9 @@ pub struct Sets {
 
     /// USB pins
     pub usb: USB,
+
+    /// LED pin
+    pub user_led: Pa15<Input<Floating>>,
 }
 
 impl Pins {
@@ -247,6 +250,8 @@ impl Pins {
             dp: self.usb_dp,
         };
 
+        let user_led = self.user_led;
+
         Sets {
             accelerometer,
             buzzer,
@@ -258,6 +263,7 @@ impl Pins {
             sd_card,
             uart,
             usb,
+            user_led,
         }
     }
 }

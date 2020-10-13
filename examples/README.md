@@ -24,6 +24,25 @@ $ cargo build --release --example=blinky
 
 Regardless of which method used, be sure to put your device in bootloader mode first by toggling the reset switch twice.
 
+### Linux permissions
+
+On Linux, you may wish to use udev to grant you access to the bootloader USB port,
+without being root. You can do this by creating a file `/etc/udev/rules.d/99-wio-terminal.rules`
+with the following contents:
+
+```
+ATTRS{idVendor}=="2886", ATTRS{idProduct}=="002d", ENV{ID_MM_DEVICE_IGNORE}="1"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="2886", ATTRS{idProduct}=="002d", MODE="0666"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="2886", ATTRS{idProduct}=="002d", MODE="0666"
+```
+
+And reloading your udev rules like this:
+
+```shell
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+```
+
 ### arm-none-eabi-objcopy & bossac
 
 Make sure you have built the desired example in release mode first, as described above.
