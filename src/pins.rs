@@ -1,6 +1,7 @@
 use atsamd_hal::gpio::{self, *};
 use atsamd_hal::{define_pins, target_device};
 
+use super::buttons::ButtonPins;
 use super::display::Display;
 use super::sensors::{Accelerometer, LightSensor};
 use super::serial::{UART, USB};
@@ -29,7 +30,7 @@ define_pins!(
     pin switch_x = d8,
     pin switch_y = d9,
     pin switch_z = d10,
-    // pin switch_b = d12, // NOTE: `sd_det` is also mapped to `d12`
+    pin switch_b = d12,
     pin switch_u = d20,
 
     /// I2C
@@ -94,7 +95,7 @@ define_pins!(
     pin sd_sck = c17,
     pin sd_miso = c18,
     pin sd_cs = c19,
-    pin sd_det = d12,
+    pin sd_det = d21,
 
     /// WIFI/BLE
     pin rtl8720d_chip_pu = a18,
@@ -189,6 +190,8 @@ pub struct Sets {
 
     /// LED pin
     pub user_led: Pa15<Input<Floating>>,
+
+    pub buttons: ButtonPins,
 }
 
 impl Pins {
@@ -252,6 +255,17 @@ impl Pins {
 
         let user_led = self.user_led;
 
+        let buttons = ButtonPins {
+            button1: self.button1,
+            button2: self.button2,
+            button3: self.button3,
+            switch_x: self.switch_x,
+            switch_y: self.switch_y,
+            switch_z: self.switch_z,
+            switch_u: self.switch_u,
+            switch_b: self.switch_b,
+        };
+
         Sets {
             accelerometer,
             buzzer,
@@ -264,6 +278,7 @@ impl Pins {
             uart,
             usb,
             user_led,
+            buttons,
         }
     }
 }

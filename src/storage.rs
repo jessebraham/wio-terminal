@@ -1,7 +1,7 @@
 #[rustfmt::skip]
 use atsamd_hal::gpio::{
     Floating, Input,
-    Pa8, Pa9, Pa10, Pa11, Pb10, Pb11, Pc16, Pc17, Pc18, Pc19, Pd12,
+    Pa8, Pa9, Pa10, Pa11, Pb10, Pb11, Pc16, Pc17, Pc18, Pc19, Pd21,
 };
 
 /// QSPI Flash pins (uses `SERCOM4`)
@@ -40,5 +40,5 @@ pub struct SDCard {
     pub miso: Pc18<Input<Floating>>,
 
     /// SD Card detect pin
-    pub det: Pd12<Input<Floating>>,
+    pub det: Pd21<Input<Floating>>,
 }

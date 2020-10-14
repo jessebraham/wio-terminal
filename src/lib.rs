@@ -31,6 +31,7 @@ mod serial;
 mod sound;
 mod storage;
 
+pub mod buttons;
 pub use display::*;
 pub use pins::*;
 pub use sensors::*;
