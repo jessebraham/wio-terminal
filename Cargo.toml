@@ -28,7 +28,7 @@ ili9341 = "~0.4"
 
 [dependencies.atsamd-hal]
 git = "https://github.com/atsamd-rs/atsamd"
-rev = "54cb571de48beee6d3a3ba61d87e27185536b879"
+rev = "b075ee1f95bc0ffe78a374024b2471abac70b2cb"
 
 [dependencies.lis3dh]
 git = "https://github.com/BenBergman/lis3dh-rs"
@@ -71,3 +71,6 @@ name = "blinky"
 
 [[example]]
 name = "orientation"
+
+[[example]]
+name = "buttons"
