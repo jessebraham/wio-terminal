@@ -10,12 +10,10 @@ use eg::prelude::*;
 use eg::primitives::{circle::Circle, rectangle::Rectangle, triangle::Triangle};
 use eg::style::{PrimitiveStyle, PrimitiveStyleBuilder};
 
-use wio::buttons::{Button, ButtonController, ButtonEvent};
 use wio::hal::clock::GenericClockController;
 use wio::hal::delay::Delay;
 use wio::pac::{interrupt, CorePeripherals, Peripherals};
-use wio::prelude::*;
-use wio::{button_interrupt, entry, Pins, Sets};
+use wio::{button_interrupt, entry, Button, ButtonController, ButtonEvent, Pins, Sets};
 
 use cortex_m::interrupt::{free as disable_interrupts, CriticalSection};
 

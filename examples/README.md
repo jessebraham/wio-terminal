@@ -76,6 +76,14 @@ $ cargo hf2 --release --example=blinky --vid 0x2886 --pid 0x002d
 
 Flash the (blue) User LED, located on the bottom of the device beside the USB port, at a set interval.
 
+### [`buttons`](buttons.rs)
+
+Demonstrate the use of the buttons and 5-way switch. Displays arrows indicating which button was pressed.
+
 ### [`orientation`](orientation.rs)
 
 Display Ferris centered on the screen. Maintain the correct orientation of the image as determined by the accelerometer.
+
+### [`usb_serial_display`](usb_serial_display.rs)
+
+Makes the Wio Terminal appear as a USB serial port. The screen can be written to by sending messages down the serial port.

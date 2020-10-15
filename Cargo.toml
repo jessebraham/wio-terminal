@@ -2,22 +2,23 @@
 name = "wio-terminal"
 version = "0.1.0"
 authors = ["Jesse Braham <jesse@beta7.io>"]
+edition = "2018"
 description = "Board support crate for the Seeed Studio Wio Terminal"
-categories = [
-    "embedded",
-    "hardware-support",
-    "no-std",
-]
+documentation = "https://docs.rs/wio-terminal/"
+readme = "README.md"
+repository = "https://github.com/jessebraham/wio-terminal"
+license = "MIT OR Apache-2.0"
 keywords = [
     "arm",
     "cortex-m",
     "embedded-hal",
     "no-std",
 ]
-license = "MIT OR Apache-2.0"
-repository = "https://github.com/jessebraham/wio-terminal"
-readme = "README.md"
-edition = "2018"
+categories = [
+    "embedded",
+    "hardware-support",
+    "no-std",
+]
 
 [dependencies]
 cortex-m = "~0.6"
@@ -48,7 +49,7 @@ panic-halt = "~0.2"
 
 [features]
 default = ["atsamd-hal/samd51p19a", "rt", "unproven", "usb"]
-rt = ["cortex-m-rt", "atsamd-hal/samd51p19a-rt"]
+rt = ["atsamd-hal/samd51p19a-rt", "cortex-m-rt"]
 unproven = ["atsamd-hal/unproven"]
 usb = ["atsamd-hal/usb", "usb-device", "usbd-serial"]
 
@@ -63,14 +64,14 @@ lto = true
 opt-level = "s"
 
 [[example]]
-name = "usb_serial_display"
-required-features = ["usb"]
+name = "blinky"
 
 [[example]]
-name = "blinky"
+name = "buttons"
 
 [[example]]
 name = "orientation"
 
 [[example]]
-name = "buttons"
+name = "usb_serial_display"
+required-features = ["usb"]

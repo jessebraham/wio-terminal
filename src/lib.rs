@@ -20,10 +20,11 @@ pub use cortex_m_rt::entry;
 // useful to the user.
 pub use lis3dh::accelerometer;
 
-// The prelude is the only public module, as the remaining have their members
-// available through the Sets struct.
+// `prelude` is the only module from this crate which is public, as the
+// remaining have their members exposed via the Sets struct.
 pub mod prelude;
 
+mod buttons;
 mod display;
 mod pins;
 mod sensors;
@@ -31,7 +32,7 @@ mod serial;
 mod sound;
 mod storage;
 
-pub mod buttons;
+pub use buttons::*;
 pub use display::*;
 pub use pins::*;
 pub use sensors::*;

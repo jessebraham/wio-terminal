@@ -46,7 +46,7 @@ impl Accelerometer {
     }
 }
 
-// Analog Light Sensor
+/// Analog Light Sensor
 pub struct LightSensor {
     /// Analog Light Sensor input pin
     pub pd1: Pd1<Input<Floating>>,
