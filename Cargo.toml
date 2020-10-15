@@ -27,7 +27,8 @@ heapless = "~0.5"
 ili9341 = "~0.4"
 
 [dependencies.atsamd-hal]
-path = "../atsamd/hal"
+git = "https://github.com/atsamd-rs/atsamd"
+rev = "b075ee1f95bc0ffe78a374024b2471abac70b2cb"
 
 [dependencies.lis3dh]
 git = "https://github.com/BenBergman/lis3dh-rs"
