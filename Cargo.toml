@@ -74,4 +74,3 @@ name = "orientation"
 
 [[example]]
 name = "buttons"
-# required-features = ["unflappable"]

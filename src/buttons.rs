@@ -48,6 +48,10 @@ impl ButtonPins {
             self.switch_b.id(),
         ]);
 
+        // Unfortunately, the pin assigned to B1 shares the same
+        // ExtInt line as up on the joystick. As such, we don't
+        // support B1.
+
         // let mut b1 = self.button1.into_ei(port);
         let mut b2 = self.button2.into_ei(port);
         let mut b3 = self.button3.into_ei(port);
@@ -171,15 +175,19 @@ impl ButtonController {
 
 #[macro_export]
 macro_rules! button_interrupt {
-    ($controller:ident, unsafe fn $func_name:ident ($cs:ident $cstype:ty, event ButtonEvent ) $code:block) => {
+    ($controller:ident, unsafe fn $func_name:ident ($cs:ident: $cstype:ty, $event:ident: ButtonEvent ) $code:block) => {
+        unsafe fn $func_name($cs: $cstype, $event: ButtonEvent) {
+            $code
+        }
+
         macro_rules! _button_interrupt_handler {
             ($Interrupt:ident, $Handler:ident) => {
                 #[interrupt]
                 fn $Interrupt() {
-                    disable_interrupts(|$cs| unsafe {
+                    disable_interrupts(|cs| unsafe {
                         $controller.as_mut().map(|ctrlr| {
                             if let Some(event) = ctrlr.$Handler() {
-                                $code
+                                $func_name(cs, event);
                             }
                         });
                     });

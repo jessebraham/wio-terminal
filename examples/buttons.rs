@@ -17,7 +17,7 @@ use wio::pac::{interrupt, CorePeripherals, Peripherals};
 use wio::prelude::*;
 use wio::{button_interrupt, entry, Pins, Sets};
 
-use cortex_m::interrupt::free as disable_interrupts;
+use cortex_m::interrupt::{free as disable_interrupts, CriticalSection};
 
 use heapless::consts::U8;
 use heapless::spsc::Queue;
@@ -183,7 +183,10 @@ fn draw_button_marker<D: DrawTarget<Rgb565>>(
 static mut BUTTON_CTRLR: Option<ButtonController> = None;
 static mut Q: Queue<ButtonEvent, U8> = Queue(heapless::i::Queue::new());
 
-button_interrupt!(BUTTON_CTRLR, unsafe fn on_button_event(_cs CriticalSection, event ButtonEvent) {
-    let mut q = Q.split().0;
-    q.enqueue(event).ok();
-});
+button_interrupt!(
+    BUTTON_CTRLR,
+    unsafe fn on_button_event(_cs: &CriticalSection, event: ButtonEvent) {
+        let mut q = Q.split().0;
+        q.enqueue(event).ok();
+    }
+);
