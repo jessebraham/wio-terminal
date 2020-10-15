@@ -171,14 +171,14 @@ impl ButtonController {
 
 #[macro_export]
 macro_rules! button_interrupt {
-    ($controller:ident, unsafe fn $func_name:ident ($cs:ident $cstype:ty, $event:ident ButtonEvent ) $code:block) => {
-        macro_rules! handler {
+    ($controller:ident, unsafe fn $func_name:ident ($cs:ident $cstype:ty, event ButtonEvent ) $code:block) => {
+        macro_rules! _button_interrupt_handler {
             ($Interrupt:ident, $Handler:ident) => {
                 #[interrupt]
                 fn $Interrupt() {
                     disable_interrupts(|$cs| unsafe {
                         $controller.as_mut().map(|ctrlr| {
-                            if let Some($event) = ctrlr.$Handler() {
+                            if let Some(event) = ctrlr.$Handler() {
                                 $code
                             }
                         });
@@ -187,12 +187,12 @@ macro_rules! button_interrupt {
             };
         }
 
-        handler!(EIC_EXTINT_3, interrupt_extint3);
-        handler!(EIC_EXTINT_4, interrupt_extint4);
-        handler!(EIC_EXTINT_5, interrupt_extint5);
-        handler!(EIC_EXTINT_7, interrupt_extint7);
-        handler!(EIC_EXTINT_10, interrupt_extint10);
-        handler!(EIC_EXTINT_11, interrupt_extint11);
-        handler!(EIC_EXTINT_12, interrupt_extint12);
+        _button_interrupt_handler!(EIC_EXTINT_3, interrupt_extint3);
+        _button_interrupt_handler!(EIC_EXTINT_4, interrupt_extint4);
+        _button_interrupt_handler!(EIC_EXTINT_5, interrupt_extint5);
+        _button_interrupt_handler!(EIC_EXTINT_7, interrupt_extint7);
+        _button_interrupt_handler!(EIC_EXTINT_10, interrupt_extint10);
+        _button_interrupt_handler!(EIC_EXTINT_11, interrupt_extint11);
+        _button_interrupt_handler!(EIC_EXTINT_12, interrupt_extint12);
     };
 }
