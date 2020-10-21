@@ -7,12 +7,13 @@ use embedded_graphics as eg;
 use panic_halt as _;
 use wio_terminal as wio;
 
-use eg::fonts::{Font6x12, Text};
+use eg::fonts::{Font24x32, Text};
 use eg::pixelcolor::Rgb565;
 use eg::prelude::*;
 use eg::primitives::rectangle::Rectangle;
 use eg::style::{PrimitiveStyleBuilder, TextStyle};
 
+use cortex_m::interrupt::free as disable_interrupts;
 use cortex_m::peripheral::NVIC;
 
 use wio::hal::clock::GenericClockController;
@@ -20,15 +21,16 @@ use wio::hal::delay::Delay;
 use wio::pac::{interrupt, CorePeripherals, Peripherals};
 use wio::prelude::*;
 use wio::{entry, Pins, Sets};
-use wio::{Scroller, LCD};
+
+use core::fmt::Write;
+use heapless::consts::U16;
+use heapless::String;
+use wio::hal::rtc;
 
 use usb_device::bus::UsbBusAllocator;
 use usb_device::prelude::*;
 use usbd_serial::{SerialPort, USB_CLASS_CDC};
 use wio::hal::usb::UsbBus;
-
-use heapless::consts::U16;
-use heapless::spsc::Queue;
 
 #[entry]
 fn main() -> ! {
@@ -47,12 +49,13 @@ fn main() -> ! {
     let pins = Pins::new(peripherals.PORT);
     let mut sets: Sets = pins.split();
 
-    let mut user_led = sets.user_led.into_open_drain_output(&mut sets.port);
-    user_led.set_low().unwrap();
+    unsafe {
+        RTC = Some(rtc::RtcClock::new(peripherals.RTC, &mut peripherals.MCLK));
+    }
 
     // Initialize the ILI9341-based LCD display. Create a black backdrop the size of
     // the screen.
-    let (display, _backlight) = sets
+    let (mut display, _backlight) = sets
         .display
         .init(
             &mut clocks,
@@ -61,6 +64,15 @@ fn main() -> ! {
             &mut sets.port,
             &mut delay,
         )
+        .unwrap();
+    Rectangle::new(Point::new(0, 0), Point::new(320, 240))
+        .into_styled(
+            PrimitiveStyleBuilder::new()
+                .fill_color(Rgb565::BLACK)
+                .build(),
+        )
+        .draw(&mut display)
+        .ok()
         .unwrap();
 
     // Initialize USB.
@@ -93,117 +105,40 @@ fn main() -> ! {
         NVIC::unmask(interrupt::USB_TRCPT1);
     }
 
-    let mut t = Terminal::new(display);
-    t.write_str("Hello! Send text to me over the USB serial port, and I'll display it!");
-    t.write_str("\n");
-    t.write_str("On linux:\n");
-    t.write_str("  sudo stty -F /dev/ttyACM0 115200 raw -echo\n");
-    t.write_str("  sudo bash -c \"echo 'Hi' > /dev/ttyACM0\"\n");
+    let style = TextStyle::new(Font24x32, Rgb565::WHITE);
 
-    let mut consumer = unsafe { Q.split().1 };
     loop {
-        if let Some(segment) = consumer.dequeue() {
-            t.write(segment);
-            user_led.toggle();
-        }
-    }
-}
+        delay.delay_ms(1000 as u16);
+        let time =
+            disable_interrupts(|_| unsafe { RTC.as_mut().map(|rtc| rtc.current_time()) }).unwrap();
 
-type TextSegment = ([u8; 32], usize);
+        let mut data = String::<U16>::new();
+        write!(data, "{:02}:{:02}:{:02}", time.hours, time.minutes, time.seconds)
+            .ok()
+            .unwrap();
 
-struct Terminal {
-    text_style: TextStyle<Rgb565, Font6x12>,
-    cursor: Point,
-    display: LCD,
-    scroller: Scroller,
-}
-
-impl Terminal {
-    pub fn new(mut display: LCD) -> Self {
-        // Clear the screen.
-        let style = PrimitiveStyleBuilder::new()
-            .fill_color(Rgb565::BLACK)
-            .build();
-        let backdrop = Rectangle::new(Point::new(0, 0), Point::new(320, 320)).into_styled(style);
-        backdrop.draw(&mut display).ok().unwrap();
-
-        let scroller = display.configure_vertical_scroll(0, 0).unwrap();
-
-        Self {
-            text_style: TextStyle::new(Font6x12, Rgb565::WHITE),
-            cursor: Point::new(0, 0),
-            display,
-            scroller,
-        }
-    }
-
-    pub fn write_str(&mut self, str: &str) {
-        for character in str.chars() {
-            self.write_character(character);
-        }
-    }
-
-    pub fn write_character(&mut self, c: char) {
-        if self.cursor.x >= 320 || c == '\n' {
-            self.cursor = Point::new(0, self.cursor.y + Font6x12::CHARACTER_SIZE.height as i32);
-        }
-        if self.cursor.y >= 240 {
-            self.animate_clear();
-            self.cursor = Point::new(0, 0);
-        }
-
-        if c != '\n' {
-            let mut buf = [0u8; 8];
-            Text::new(c.encode_utf8(&mut buf), self.cursor)
-                .into_styled(self.text_style)
-                .draw(&mut self.display)
-                .ok()
-                .unwrap();
-
-            self.cursor.x += (Font6x12::CHARACTER_SIZE.width + Font6x12::CHARACTER_SPACING) as i32;
-        }
-    }
-
-    pub fn write(&mut self, segment: TextSegment) {
-        let (buf, count) = segment;
-        for (i, character) in buf.iter().enumerate() {
-            if i >= count {
-                break;
-            }
-            self.write_character(*character as char);
-        }
-    }
-
-    fn animate_clear(&mut self) {
-        for x in (0..320).step_by(Font6x12::CHARACTER_SIZE.width as usize) {
-            self.display
-                .scroll_vertically(&mut self.scroller, Font6x12::CHARACTER_SIZE.width as u16)
-                .ok()
-                .unwrap();
-            Rectangle::new(
-                Point::new(x + 0, 0),
-                Point::new(x + Font6x12::CHARACTER_SIZE.width as i32, 240),
-            )
+        Rectangle::new(Point::new(55, 80), Point::new(250, 112))
             .into_styled(
                 PrimitiveStyleBuilder::new()
                     .fill_color(Rgb565::BLACK)
                     .build(),
             )
-            .draw(&mut self.display)
+            .draw(&mut display)
             .ok()
             .unwrap();
 
-            for _ in 0..1000 {
-                cortex_m::asm::nop();
-            }
-        }
+        Text::new(data.as_str(), Point::new(55, 80))
+            .into_styled(style)
+            .draw(&mut display)
+            .ok()
+            .unwrap();
     }
 }
 
 static mut USB_ALLOCATOR: Option<UsbBusAllocator<UsbBus>> = None;
 static mut USB_BUS: Option<UsbDevice<UsbBus>> = None;
 static mut USB_SERIAL: Option<SerialPort<UsbBus>> = None;
-static mut Q: Queue<TextSegment, U16> = Queue(heapless::i::Queue::new());
+static mut RTC: Option<rtc::RtcClock> = None;
 
 fn poll_usb() {
     unsafe {
@@ -211,10 +146,31 @@ fn poll_usb() {
             USB_SERIAL.as_mut().map(|serial| {
                 usb_dev.poll(&mut [serial]);
                 let mut buf = [0u8; 32];
-                let mut terminal = Q.split().0;
 
                 if let Ok(count) = serial.read(&mut buf) {
-                    terminal.enqueue((buf, count)).ok().unwrap();
+                    // terminal.enqueue((buf, count)).ok().unwrap();
+                    let mut buffer: &[u8] = &buf[..count];
+
+                    while buffer.len() > 5 {
+                        match timespec(buffer) {
+                            Ok((remaining, time)) => {
+                                buffer = remaining;
+                                disable_interrupts(|_| {
+                                    RTC.as_mut().map(|rtc| {
+                                        rtc.set_time(rtc::Datetime{
+                                            seconds: time.second as u8,
+                                            minutes: time.minute as u8,
+                                            hours: time.hour as u8,
+                                            day: 0,
+                                            month: 0,
+                                            year: 0,
+                                        });
+                                    });
+                                });
+                            },
+                            _ => break,
+                        };
+                    }
                 };
             });
         });
@@ -235,3 +191,33 @@ fn USB_TRCPT0() {
 fn USB_TRCPT1() {
     poll_usb();
 }
+
+
+#[derive(Clone)]
+pub struct Time {
+    hour: usize,
+    minute: usize,
+    second: usize,
+}
+
+
+#[macro_use]
+extern crate nom;
+use drogue_nom_utils::parse_usize;
+
+named!(
+    pub timespec<Time>,
+    do_parse!(
+        opt!( char!('\n') ) >>
+        tag!("time=") >>
+        hour: parse_usize >>
+        char!(':') >>
+        minute: parse_usize >>
+        char!(':') >>
+        second: parse_usize >>
+        tag!("\n") >>
+        (
+            Time{ hour, minute, second }
+        )
+    )
+);
