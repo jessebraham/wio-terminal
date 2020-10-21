@@ -32,6 +32,18 @@ pub struct Display {
     pub backlight: Pc5<Input<Floating>>,
 }
 
+/// Type alias for the ILI9341 LCD display.
+pub type LCD = Ili9341<
+    SPIInterface<
+        SPIMaster7<Sercom7Pad2<Pb18<PfD>>, Sercom7Pad3<Pb19<PfD>>, Sercom7Pad1<Pb20<PfD>>>,
+        Pc6<Output<PushPull>>,
+        Pb21<Output<PushPull>>,
+    >,
+    Pc7<Output<PushPull>>,
+>;
+
+pub use ili9341::Scroller;
+
 impl Display {
     /// Initialize the display and its corresponding SPI bus peripheral. Return
     /// a tuple containing the configured display driver struct and backlight
@@ -43,24 +55,7 @@ impl Display {
         mclk: &mut MCLK,
         port: &mut Port,
         delay: &mut Delay,
-    ) -> Result<
-        (
-            Ili9341<
-                SPIInterface<
-                    SPIMaster7<
-                        Sercom7Pad2<Pb18<PfD>>,
-                        Sercom7Pad3<Pb19<PfD>>,
-                        Sercom7Pad1<Pb20<PfD>>,
-                    >,
-                    Pc6<Output<PushPull>>,
-                    Pb21<Output<PushPull>>,
-                >,
-                Pc7<Output<PushPull>>,
-            >,
-            Pc5<Output<PushPull>>,
-        ),
-        (),
-    > {
+    ) -> Result<(LCD, Pc5<Output<PushPull>>), ()> {
         // Initialize the SPI peripherial on the configured pins, using SERCOM7 and
         // running at 20MHz.
         let gclk0 = clocks.gclk0();

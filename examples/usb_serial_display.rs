@@ -20,6 +20,7 @@ use wio::hal::delay::Delay;
 use wio::pac::{interrupt, CorePeripherals, Peripherals};
 use wio::prelude::*;
 use wio::{entry, Pins, Sets};
+use wio::{Scroller, LCD};
 
 use usb_device::bus::UsbBusAllocator;
 use usb_device::prelude::*;
@@ -110,14 +111,15 @@ fn main() -> ! {
 
 type TextSegment = ([u8; 32], usize);
 
-struct Terminal<D: DrawTarget<Rgb565>> {
+struct Terminal {
     text_style: TextStyle<Rgb565, Font6x12>,
     cursor: Point,
-    display: D,
+    display: LCD,
+    scroller: Scroller,
 }
 
-impl<D: DrawTarget<Rgb565>> Terminal<D> {
-    pub fn new(mut display: D) -> Self {
+impl Terminal {
+    pub fn new(mut display: LCD) -> Self {
         // Clear the screen.
         let style = PrimitiveStyleBuilder::new()
             .fill_color(Rgb565::BLACK)
@@ -125,10 +127,13 @@ impl<D: DrawTarget<Rgb565>> Terminal<D> {
         let backdrop = Rectangle::new(Point::new(0, 0), Point::new(320, 320)).into_styled(style);
         backdrop.draw(&mut display).ok().unwrap();
 
+        let scroller = display.configure_vertical_scroll(0, 0).unwrap();
+
         Self {
             text_style: TextStyle::new(Font6x12, Rgb565::WHITE),
             cursor: Point::new(0, 0),
             display,
+            scroller,
         }
     }
 
@@ -140,10 +145,10 @@ impl<D: DrawTarget<Rgb565>> Terminal<D> {
 
     pub fn write_character(&mut self, c: char) {
         if self.cursor.x >= 320 || c == '\n' {
-            self.cursor = Point::new(0, self.cursor.y + Font6x12::CHARACTER_SIZE.height as i32)
+            self.cursor = Point::new(0, self.cursor.y + Font6x12::CHARACTER_SIZE.height as i32);
         }
         if self.cursor.y >= 240 {
-            self.display.clear(Rgb565::BLACK).ok().unwrap();
+            self.animate_clear();
             self.cursor = Point::new(0, 0);
         }
 
@@ -166,6 +171,31 @@ impl<D: DrawTarget<Rgb565>> Terminal<D> {
                 break;
             }
             self.write_character(*character as char);
+        }
+    }
+
+    fn animate_clear(&mut self) {
+        for x in (0..320).step_by(Font6x12::CHARACTER_SIZE.width as usize) {
+            self.display
+                .scroll_vertically(&mut self.scroller, Font6x12::CHARACTER_SIZE.width as u16)
+                .ok()
+                .unwrap();
+            Rectangle::new(
+                Point::new(x+0, 0),
+                Point::new(x + Font6x12::CHARACTER_SIZE.width as i32, 240),
+            )
+            .into_styled(
+                PrimitiveStyleBuilder::new()
+                    .fill_color(Rgb565::BLACK)
+                    .build(),
+            )
+            .draw(&mut self.display)
+            .ok()
+            .unwrap();
+
+            for _ in 0..1000 {
+                cortex_m::asm::nop();
+            }
         }
     }
 }
