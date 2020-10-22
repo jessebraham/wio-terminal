@@ -1,8 +1,12 @@
 #![no_std]
 #![no_main]
 
-/// Makes the wio_terminal appear as a USB serial port. The screen can
-/// be written to by sending messages down the serial port.
+/// Makes the wio_terminal appear as a USB serial port, and display
+/// the time on the screen.
+///
+/// You can tell the terminal the time by running (on linux):
+///  - sudo stty -F /dev/ttyACM0 115200 raw -echo
+///  - sudo bash -c "echo 'time=hour:minute:second' > /dev/ttyACM0"
 use embedded_graphics as eg;
 use panic_halt as _;
 use wio_terminal as wio;
@@ -113,9 +117,13 @@ fn main() -> ! {
             disable_interrupts(|_| unsafe { RTC.as_mut().map(|rtc| rtc.current_time()) }).unwrap();
 
         let mut data = String::<U16>::new();
-        write!(data, "{:02}:{:02}:{:02}", time.hours, time.minutes, time.seconds)
-            .ok()
-            .unwrap();
+        write!(
+            data,
+            "{:02}:{:02}:{:02}",
+            time.hours, time.minutes, time.seconds
+        )
+        .ok()
+        .unwrap();
 
         Rectangle::new(Point::new(55, 80), Point::new(250, 112))
             .into_styled(
@@ -157,7 +165,7 @@ fn poll_usb() {
                                 buffer = remaining;
                                 disable_interrupts(|_| {
                                     RTC.as_mut().map(|rtc| {
-                                        rtc.set_time(rtc::Datetime{
+                                        rtc.set_time(rtc::Datetime {
                                             seconds: time.second as u8,
                                             minutes: time.minute as u8,
                                             hours: time.hour as u8,
@@ -167,7 +175,7 @@ fn poll_usb() {
                                         });
                                     });
                                 });
-                            },
+                            }
                             _ => break,
                         };
                     }
@@ -192,14 +200,12 @@ fn USB_TRCPT1() {
     poll_usb();
 }
 
-
 #[derive(Clone)]
 pub struct Time {
     hour: usize,
     minute: usize,
     second: usize,
 }
-
 
 #[macro_use]
 extern crate nom;
