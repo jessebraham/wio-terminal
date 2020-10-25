@@ -1,3 +1,9 @@
+# This project has moved!
+
+### Everything has been moved into the [atsamd-rs/atsamd](https://github.com/atsamd-rs/atsamd) repository, and can now be found [here](https://github.com/atsamd-rs/atsamd/tree/master/boards/wio_terminal).
+
+---
+
 # `wio-terminal`
 
 [![Build Status](https://travis-ci.org/jessebraham/wio-terminal.svg?branch=master)](https://travis-ci.org/jessebraham/wio-terminal)
